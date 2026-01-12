@@ -11,7 +11,7 @@ export interface Task {
   dueDate?: string
   priority: 'LOW' | 'MEDIUM' | 'HIGH'
   status: 'PENDING' | 'IN_PROGRESS' | 'DONE'
-  userId: string
+  userId?: string
   categories: Category[]
   createdAt: string
   updatedAt: string

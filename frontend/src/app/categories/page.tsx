@@ -65,6 +65,15 @@ export default function CategoriesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Indicator */}
+        <div className="mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-gray-900">Dashboard</Link>
+            <span>/</span>
+            <span className="font-medium text-gray-900">Categories</span>
+          </nav>
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">

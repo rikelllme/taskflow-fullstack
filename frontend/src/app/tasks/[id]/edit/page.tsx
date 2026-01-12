@@ -130,6 +130,17 @@ export default function EditTask() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Indicator */}
+        <div className="mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-gray-900">Dashboard</Link>
+            <span>/</span>
+            <Link href={`/tasks/${taskId}`} className="hover:text-gray-900">Task Details</Link>
+            <span>/</span>
+            <span className="font-medium text-gray-900">Edit Task</span>
+          </nav>
+        </div>
+
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link

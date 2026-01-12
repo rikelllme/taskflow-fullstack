@@ -1,190 +1,247 @@
-# TaskFlow - Full-Stack Task Management Application
+# TaskFlow - Sistema de Gerenciamento de Tarefas
 
-A modern, full-stack task management application built with **NestJS** (backend) and **Next.js** (frontend) with **PostgreSQL** database.
+Um moderno sistema de gerenciamento de tarefas full-stack desenvolvido com **NestJS** (backend) e **Next.js** (frontend) utilizando **PostgreSQL** como banco de dados.
 
-## 🚀 Features
+## 📋 Visão Geral
+
+O TaskFlow é uma aplicação completa para gerenciamento de tarefas que permite:
+- Criar, visualizar, editar e excluir tarefas
+- Organizar tarefas em categorias
+- Filtrar e buscar tarefas por diferentes critérios
+- Interface moderna e responsiva com design glassmorphism
+
+## 🚀 Funcionalidades
 
 ### Backend (NestJS + Prisma + PostgreSQL)
-- ✅ RESTful API for task management
-- ✅ Complete CRUD operations
-- ✅ Advanced filtering (status, priority, category)
-- ✅ Category management
-- ✅ Strong validation with class-validator
-- ✅ CORS enabled for frontend communication
+- ✅ API REST completa para gerenciamento de tarefas
+- ✅ Operações CRUD completas
+- ✅ Sistema avançado de filtros (status, prioridade, categoria)
+- ✅ Gerenciamento de categorias
+- ✅ Validação forte com class-validator
+- ✅ CORS habilitado para comunicação com frontend
 
 ### Frontend (Next.js + React + TypeScript + Tailwind CSS)
-- ✅ Modern responsive UI
-- ✅ Task dashboard with real-time filters
-- ✅ Create, edit, and delete tasks
-- ✅ Category selection (multiple per task)
-- ✅ Status management
-- ✅ Category management interface
+- ✅ Interface moderna e responsiva
+- ✅ Dashboard com filtros em tempo real
+- ✅ Criação, edição e exclusão de tarefas
+- ✅ Seleção múltipla de categorias por tarefa
+- ✅ Gerenciamento de status de tarefas
+- ✅ Interface de gerenciamento de categorias
 
-### Database Schema
+### Esquema do Banco de Dados
 - **User**: id, name, email, createdAt
 - **Task**: id, title, description, dueDate, priority, status, userId, createdAt, updatedAt
 - **Category**: id, name, createdAt
-- **Relationships**: Tasks ↔ Categories (many-to-many)
+- **Relacionamentos**: Tasks ↔ Categories (muitos-para-muitos)
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnológico
 
 - **Backend**: NestJS, Prisma ORM, PostgreSQL, TypeScript
 - **Frontend**: Next.js 16, React, TypeScript, Tailwind CSS
-- **Database**: PostgreSQL
-- **Validation**: class-validator, class-transformer
-- **Styling**: Tailwind CSS
+- **Banco de Dados**: PostgreSQL
+- **Validação**: class-validator, class-transformer
+- **Estilização**: Tailwind CSS com design glassmorphism
 
-## 📁 Project Structure
+## 📁 Estrutura do Projeto
 
 ```
 taskflow-fullstack/
-├── backend/                 # NestJS API server
+├── backend/                 # Servidor API NestJS
 │   ├── src/
-│   │   ├── prisma/         # Database configuration
-│   │   ├── task/           # Task module (CRUD)
-│   │   ├── category/       # Category module (CRUD)
-│   │   ├── user/           # User module (placeholder)
-│   │   └── app.module.ts   # Main app module
-│   ├── prisma/             # Database schema and migrations
+│   │   ├── prisma/         # Configuração do banco
+│   │   ├── task/           # Módulo de tarefas (CRUD)
+│   │   ├── category/       # Módulo de categorias (CRUD)
+│   │   ├── user/           # Módulo de usuários (placeholder)
+│   │   └── app.module.ts   # Módulo principal da aplicação
+│   ├── prisma/             # Schema e migrações do banco
 │   └── package.json
-├── frontend/                # Next.js React application
+├── frontend/                # Aplicação React Next.js
 │   ├── src/
-│   │   ├── app/            # Next.js app router pages
-│   │   ├── lib/            # API client and utilities
-│   │   └── types/          # TypeScript type definitions
+│   │   ├── app/            # Páginas do Next.js App Router
+│   │   ├── lib/            # Cliente API e utilitários
+│   │   └── types/          # Definições de tipos TypeScript
 │   └── package.json
-├── .gitignore              # Comprehensive git ignore
-└── README.md              # This file
+├── images/                  # Screenshots da aplicação
+├── .gitignore              # Git ignore abrangente
+└── README.md              # Este arquivo
 ```
 
-## 🚀 Getting Started
+## 🚀 Como Executar
 
-### Prerequisites
-- Node.js 18+ and npm
-- PostgreSQL database
+### Pré-requisitos
+- Node.js 18+ e npm
+- PostgreSQL (recomendado) ou SQLite para desenvolvimento
 - Git
 
-### Installation
+### Instalação
 
-1. **Clone the repository**
+1. **Clone o repositório**
    ```bash
    git clone <repository-url>
    cd taskflow-fullstack
    ```
 
-2. **Setup Backend**
+2. **Configure o Backend**
    ```bash
    cd backend
    npm install
    ```
 
-3. **Setup Frontend**
+3. **Configure o Frontend**
    ```bash
    cd ../frontend
    npm install
    ```
 
-### Database Configuration
+### Configuração do Banco de Dados
 
-1. **Update database connection in `backend/.env`**
+1. **Configure a conexão com o banco em `backend/.env`**
    ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+   # Para PostgreSQL:
+   DATABASE_URL="postgresql://username:password@localhost:5432/taskflow_db"
+
+   # Para SQLite (desenvolvimento):
+   DATABASE_URL="file:./dev.db"
    ```
 
-2. **Run database migrations**
+2. **Execute as migrações do banco**
    ```bash
    cd backend
    npx prisma migrate dev --name init
    ```
 
-3. **Generate Prisma client**
+3. **Gere o cliente Prisma**
    ```bash
    npx prisma generate
    ```
 
-### Running the Application
+### Executando a Aplicação
 
-1. **Start Backend** (Terminal 1)
+1. **Inicie o Backend** (Terminal 1)
    ```bash
    cd backend
    npm run start:dev
    ```
-   Backend will run on: http://localhost:3000
+   O backend ficará disponível em: http://localhost:3000
 
-2. **Start Frontend** (Terminal 2)
+2. **Inicie o Frontend** (Terminal 2)
    ```bash
    cd frontend
    npm run dev
    ```
-   Frontend will run on: http://localhost:3001
+   O frontend ficará disponível em: http://localhost:3001
 
-## 📋 API Endpoints
+## 📱 Screenshots
 
-### Tasks
-- `GET /tasks` - List tasks with filters
-- `POST /tasks` - Create new task
-- `GET /tasks/:id` - Get task by ID
-- `PATCH /tasks/:id` - Update task
-- `PATCH /tasks/:id/status` - Update task status
-- `DELETE /tasks/:id` - Delete task
+### Dashboard Principal
+![Dashboard](images/dasboard.png)
 
-### Categories
-- `GET /categories` - List all categories
-- `POST /categories` - Create new category
-- `GET /categories/:id` - Get category by ID
-- `PATCH /categories/:id` - Update category
-- `DELETE /categories/:id` - Delete category
+*Interface principal mostrando lista de tarefas com filtros laterais*
 
-## 🎨 Frontend Pages
+### Task Staus
+![TaskFlow Logo](images/taskflow.jpg)
 
-- `/` - Dashboard (task list with filters)
-- `/tasks/new` - Create new task
-- `/tasks/[id]` - Task details
-- `/tasks/[id]/edit` - Edit task
-- `/categories` - Category management
+*Orinetação sobre o status das tarefas*
 
-## 🔧 Development
+### View Page
+![View Page](images/viewpage.jpg)
 
-### Backend Scripts
+*Pagina para vizualização detalhada da task*
+
+### Edit Page
+![Edit Page](images/editpage.jpg)
+
+*Pagina para edição da task*
+
+## 📋 Endpoints da API
+
+### Tarefas
+- `GET /tasks` - Lista tarefas com filtros
+- `POST /tasks` - Criar nova tarefa
+- `GET /tasks/:id` - Obter tarefa por ID
+- `PATCH /tasks/:id` - Atualizar tarefa
+- `PATCH /tasks/:id/status` - Atualizar status da tarefa
+- `DELETE /tasks/:id` - Excluir tarefa
+
+### Categorias
+- `GET /categories` - Listar todas as categorias
+- `POST /categories` - Criar nova categoria
+- `GET /categories/:id` - Obter categoria por ID
+- `PATCH /categories/:id` - Atualizar categoria
+- `DELETE /categories/:id` - Excluir categoria
+
+## 🎨 Páginas do Frontend
+
+- `/` - **Dashboard**: Lista de tarefas com filtros e indicadores de página
+- `/tasks/new` - **Criar Tarefa**: Formulário completo com navegação breadcrumb
+- `/tasks/[id]` - **Detalhes da Tarefa**: Visualização completa com navegação
+- `/tasks/[id]/edit` - **Editar Tarefa**: Formulário de edição com breadcrumb
+- `/categories` - **Gerenciar Categorias**: Interface completa de CRUD
+
+## 🔧 Desenvolvimento
+
+### Scripts do Backend
 ```bash
-npm run start:dev      # Development with hot reload
-npm run build         # Build for production
-npm run test          # Run tests
-npm run lint          # Lint code
+npm run start:dev      # Desenvolvimento com hot reload
+npm run build         # Build para produção
+npm run test          # Executar testes
+npm run lint          # Verificar código
 ```
 
-### Frontend Scripts
+### Scripts do Frontend
 ```bash
-npm run dev           # Development server
-npm run build         # Build for production
-npm run start         # Start production server
-npm run lint          # Lint code
+npm run dev           # Servidor de desenvolvimento
+npm run build         # Build para produção
+npm run start         # Iniciar servidor de produção
+npm run lint          # Verificar código
 ```
 
-## 🚀 Deployment
+## 🏗️ Decisões Técnicas
 
-### Backend Deployment
-1. Build the application: `npm run build`
-2. Set production environment variables
-3. Run migrations: `npx prisma migrate deploy`
-4. Start the server: `npm run start:prod`
+### Backend
+- **NestJS**: Framework estruturado para APIs escaláveis
+- **Prisma**: ORM moderno com type safety e migrações automáticas
+- **PostgreSQL**: Banco relacional robusto para produção
+- **class-validator**: Validação forte de dados de entrada
+- **CORS**: Habilitado para comunicação segura com frontend
 
-### Frontend Deployment
-1. Build the application: `npm run build`
-2. Deploy the `out/` directory to your hosting provider
+### Frontend
+- **Next.js 16**: Framework React com App Router para melhor performance
+- **TypeScript**: Type safety completo em toda a aplicação
+- **Tailwind CSS**: Utility-first CSS com design glassmorphism
+- **Lucide React**: Ícones consistentes e modernos
+- **Componentes Modulares**: Separação clara de responsabilidades
 
-## 🤝 Contributing
+### Arquitetura
+- **RESTful API**: Padrão consolidado para APIs web
+- **State Management**: React hooks para gerenciamento local
+- **Responsive Design**: Interface adaptável para desktop e mobile
+- **Error Handling**: Tratamento robusto de erros em toda aplicação
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+### Decisões Técnicas - Interface Modal vs Navegação
+- **Modal-Centric Design**: Optamos por usar modais em vez de navegação entre páginas para operações CRUD (criar, editar, visualizar detalhes)
+- **Performance Otimizada**: Evita recarregamentos de página e mantém o contexto do usuário no dashboard
+- **Experiência Fluida**: Transições suaves entre visualização e edição sem perder o estado da aplicação
+- **Manutenibilidade**: Centralização da lógica de formulários e validações em componentes reutilizáveis
+- **SEO Trade-off**: Priorizamos UX interativa sobre SEO para páginas de formulários (aceitável para aplicação interna)
 
-## 📝 License
+## 🚀 Implantação
 
-This project is licensed under the MIT License.
+### Backend
+1. Faça build da aplicação: `npm run build`
+2. Configure variáveis de ambiente de produção
+3. Execute migrações: `npx prisma migrate deploy`
+4. Inicie o servidor: `npm run start:prod`
 
-## 📞 Support
+### Frontend
+1. Faça build da aplicação: `npm run build`
+2. Implante o diretório `out/` no seu provedor de hospedagem
 
-For questions or issues, please open an issue on GitHub or contact the development team.
+## 📈 Funcionalidades Avançadas
+
+- **Sistema de Prioridades**: LOW, MEDIUM, HIGH com indicadores visuais
+- **Ícones de Status**: Representação visual clara de estados
+- **Busca em Tempo Real**: Filtragem instantânea de tarefas
+- **Datas Inteligentes**: Destaque para tarefas atrasadas
+- **Estatísticas**: Widget de progresso diário
+- **Glassmorphism**: Design moderno com efeitos de transparência

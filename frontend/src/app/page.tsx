@@ -1,26 +1,34 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { Search, Plus, CheckCircle2, Circle, Clock, Edit3, Trash2, Filter } from 'lucide-react'
 import { apiClient } from '@/lib/api'
 import { Task, TaskFilters, Category } from '@/types/task'
+import TaskModal from '@/components/TaskModal'
+import CategoryModal from '@/components/CategoryModal'
+import TaskDetailModal from '@/components/TaskDetailModal'
+import { generateModalBreadcrumb } from '@/lib/breadcrumb'
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [filters, setFilters] = useState<TaskFilters>({})
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [viewingTask, setViewingTask] = useState<Task | null>(null)
 
   const loadTasks = async () => {
     try {
       setLoading(true)
       const data = await apiClient.getTasks(filters)
       setTasks(data)
-      setError(null)
     } catch (err) {
-      setError('Failed to load tasks')
-      console.error(err)
+      console.error('Failed to load tasks:', err)
     } finally {
       setLoading(false)
     }
@@ -43,12 +51,34 @@ export default function Dashboard() {
     loadCategories()
   }, [])
 
-  const handleStatusChange = async (taskId: string, status: 'PENDING' | 'IN_PROGRESS' | 'DONE') => {
+  const handleStatusChange = async (taskId: string, currentStatus: 'PENDING' | 'IN_PROGRESS' | 'DONE') => {
+    // Cycle through: PENDING -> IN_PROGRESS -> DONE -> PENDING
+    const statusCycle = {
+      'PENDING': 'IN_PROGRESS' as const,
+      'IN_PROGRESS': 'DONE' as const,
+      'DONE': 'PENDING' as const
+    }
+
+    const newStatus = statusCycle[currentStatus]
+
     try {
-      await apiClient.updateTaskStatus(taskId, { status })
+      await apiClient.updateTaskStatus(taskId, { status: newStatus })
       await loadTasks()
     } catch (err) {
       console.error('Failed to update status:', err)
+    }
+  }
+
+  const getStatusIcon = (status: 'PENDING' | 'IN_PROGRESS' | 'DONE') => {
+    switch (status) {
+      case 'PENDING':
+        return <Circle className="w-6 h-6 text-gray-400 hover:text-gray-600" />
+      case 'IN_PROGRESS':
+        return <Clock className="w-6 h-6 text-blue-500 hover:text-blue-700" />
+      case 'DONE':
+        return <CheckCircle2 className="w-6 h-6 text-green-500 hover:text-green-700" />
+      default:
+        return <Circle className="w-6 h-6 text-gray-400" />
     }
   }
 
@@ -63,200 +93,394 @@ export default function Dashboard() {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800'
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800'
-      case 'DONE': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
+  const handleCategoryFilter = (categoryId: string | null) => {
+    setSelectedCategory(categoryId)
+    setFilters(prev => ({
+      ...prev,
+      categoryId: categoryId || undefined
+    }))
   }
 
-  const getPriorityColor = (priority: string) => {
+  const filteredTasks = tasks.filter(task =>
+    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    task.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const completedTasks = tasks.filter(task => task.status === 'DONE').length
+  const totalTasks = tasks.length
+  const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+
+  const getCategoryColor = (categoryName: string) => {
+    const colors = [
+      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500',
+      'bg-yellow-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
+    ]
+    const index = categoryName.length % colors.length
+    return colors[index]
+  }
+
+  const getPriorityInfo = (priority: 'LOW' | 'MEDIUM' | 'HIGH') => {
     switch (priority) {
-      case 'HIGH': return 'bg-red-100 text-red-800'
-      case 'MEDIUM': return 'bg-orange-100 text-orange-800'
-      case 'LOW': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'LOW':
+        return { label: 'Low Priority', color: 'bg-green-100 text-green-800', icon: '🟢' }
+      case 'MEDIUM':
+        return { label: 'Medium Priority', color: 'bg-yellow-100 text-yellow-800', icon: '🟡' }
+      case 'HIGH':
+        return { label: 'High Priority', color: 'bg-red-100 text-red-800', icon: '🔴' }
+      default:
+        return { label: 'Medium Priority', color: 'bg-yellow-100 text-yellow-800', icon: '🟡' }
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">TaskFlow Dashboard</h1>
-          <div className="flex gap-2">
-            <Link
-              href="/categories"
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium"
-            >
-              Manage Categories
-            </Link>
-            <Link
-              href="/tasks/new"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
-            >
-              New Task
-            </Link>
+    <div className="h-screen w-screen bg-gradient-to-br from-blue-50 via-white to-green-50 overflow-hidden">
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <div className="hidden lg:flex w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200 rounded-r-[2.5rem] flex flex-col shadow-xl">
+          {/* Logo */}
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">TaskFlow</h1>
+            <p className="text-gray-600 text-sm mt-1">Manage your tasks</p>
           </div>
-        </div>
 
-        {/* Filters */}
-        <div className="bg-white p-6 rounded-lg shadow mb-8">
-          <h2 className="text-lg font-semibold mb-4">Filters</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={filters.status || ''}
-                onChange={(e) => setFilters(prev => ({
-                  ...prev,
-                  status: e.target.value as any || undefined
-                }))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Status</option>
-                <option value="PENDING">Pending</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="DONE">Done</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-              <select
-                value={filters.priority || ''}
-                onChange={(e) => setFilters(prev => ({
-                  ...prev,
-                  priority: e.target.value as any || undefined
-                }))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Priorities</option>
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-              <select
-                value={filters.categoryId || ''}
-                onChange={(e) => setFilters(prev => ({
-                  ...prev,
-                  categoryId: e.target.value || undefined
-                }))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Task List */}
-        <div className="space-y-4">
-          {loading && (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading tasks...</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <p className="text-red-800">{error}</p>
-            </div>
-          )}
-
-          {!loading && tasks.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No tasks found.</p>
-              <Link
-                href="/tasks/new"
-                className="text-blue-600 hover:text-blue-800 mt-2 inline-block"
-              >
-                Create your first task
-              </Link>
-            </div>
-          )}
-
-          {tasks.map((task) => (
-            <div key={task.id} className="bg-white rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
-                  {task.description && (
-                    <p className="text-gray-600 mt-1">{task.description}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Link
-                    href={`/tasks/${task.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View
-                  </Link>
-                  <Link
-                    href={`/tasks/${task.id}/edit`}
-                    className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(task.id)}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                  {task.status.replace('_', ' ')}
-                </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </span>
-                {task.categories.map((category) => (
-                  <span key={category.id} className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    {category.name}
-                  </span>
-                ))}
-              </div>
-
-              {task.dueDate && (
-                <div className="text-sm text-gray-600 mb-4">
-                  Due: {new Date(task.dueDate).toLocaleDateString()}
-                </div>
-              )}
-
-              {/* Status Change */}
-              <div className="flex gap-2">
-                <label className="text-sm font-medium text-gray-700">Change Status:</label>
-                <select
-                  value={task.status}
-                  onChange={(e) => handleStatusChange(task.id, e.target.value as any)}
-                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          {/* Categories */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-gray-800 font-semibold">Categories</h3>
+                <button
+                  onClick={() => setShowCategoryModal(true)}
+                  className="w-8 h-8 rounded-xl bg-green-100 hover:bg-green-200 text-green-600 hover:text-green-700 transition-colors flex items-center justify-center"
                 >
-                  <option value="PENDING">Pending</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="DONE">Done</option>
-                </select>
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleCategoryFilter(null)}
+                  className={`w-full text-left px-4 py-3 rounded-2xl transition-all mb-2 ${
+                    selectedCategory === null
+                      ? 'bg-green-500 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Filter className="w-5 h-5" />
+                    <span className="font-medium">All Tasks</span>
+                  </div>
+                </button>
+
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategoryFilter(category.id)}
+                    className={`w-full text-left px-4 py-3 rounded-2xl transition-all ${
+                      selectedCategory === category.id
+                        ? 'bg-green-500 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${getCategoryColor(category.name)}`} />
+                      <span className="font-medium">{category.name}</span>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Statistics Widget */}
+          <div className="p-6 border-t border-gray-200">
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 border border-gray-200 shadow-sm">
+              <h4 className="text-gray-800 font-semibold mb-2">Today's Progress</h4>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-gray-600 text-sm">{completedTasks} of {totalTasks} completed</span>
+                <span className="text-green-600 font-semibold">{completionPercentage}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Panel */}
+        <div className="flex-1 flex flex-col bg-gradient-to-br from-blue-50/50 to-green-50/50">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200 bg-white/40 backdrop-blur-xl">
+            {/* Page Indicator */}
+            <div className="mb-4">
+              <nav className="flex items-center space-x-2 text-sm text-gray-600">
+                <span className="font-medium text-gray-900">Dashboard</span>
+              </nav>
+            </div>
+
+            <div className="flex items-center justify-between gap-6">
+              <div className="flex items-center gap-4 flex-1">
+                {/* Search */}
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  />
+                </div>
+
+                {/* Filters */}
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-600 font-medium text-sm">Filters:</span>
+
+                  {/* Status Filter */}
+                  <select
+                    value={filters.status || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      status: e.target.value as any || undefined
+                    }))}
+                    className="px-3 py-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-xl text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">All Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+
+                  {/* Priority Filter */}
+                  <select
+                    value={filters.priority || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      priority: e.target.value as any || undefined
+                    }))}
+                    className="px-3 py-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-xl text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">All Priorities</option>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                  </select>
+
+                  {/* Category Filter */}
+                  <select
+                    value={filters.categoryId || ''}
+                    onChange={(e) => setFilters(prev => ({
+                      ...prev,
+                      categoryId: e.target.value || undefined
+                    }))}
+                    className="px-3 py-2 bg-white/60 backdrop-blur-xl border border-gray-200 rounded-xl text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowTaskModal(true)}
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-2xl font-semibold transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                <Plus className="w-5 h-5" />
+                New Task
+              </button>
+            </div>
+          </div>
+
+          {/* Tasks List */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📝</div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No tasks found</h3>
+                <p className="text-gray-600 mb-6">Create your first task to get started</p>
+                <button
+                  onClick={() => setShowTaskModal(true)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-2xl font-semibold transition-colors inline-flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Create Task
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="group bg-white/60 backdrop-blur-xl border border-gray-200 rounded-3xl p-6 hover:bg-white/80 transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    <div className="flex items-start gap-4">
+                      <button
+                        onClick={() => handleStatusChange(task.id, task.status)}
+                        className="mt-1 transition-colors"
+                      >
+                        {getStatusIcon(task.status)}
+                      </button>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`text-lg font-semibold mb-2 ${
+                          task.status === 'DONE' ? 'line-through text-gray-500' : 'text-gray-900'
+                        }`}>
+                          {task.title}
+                        </h3>
+
+                        {task.description && (
+                          <p className="text-gray-700 mb-3 line-clamp-2">
+                            {task.description}
+                          </p>
+                        )}
+
+                        {/* Status and Priority */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            task.status === 'DONE' ? 'bg-green-100 text-green-800' :
+                            task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {task.status.replace('_', ' ')}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityInfo(task.priority).color}`}>
+                            {getPriorityInfo(task.priority).icon} {task.priority}
+                          </span>
+                        </div>
+
+                        {/* Categories */}
+                        {task.categories.length > 0 && (
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <span className="text-gray-500 text-xs">Categories:</span>
+                            {task.categories.map((category) => (
+                              <span
+                                key={category.id}
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category.name)} text-white`}
+                              >
+                                {category.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Dates */}
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
+                          {task.dueDate && (
+                            <span className={`${new Date(task.dueDate) < new Date() && task.status !== 'DONE' ? 'text-red-500 font-medium' : ''}`}>
+                              Due: {new Date(task.dueDate).toLocaleDateString()}
+                            </span>
+                          )}
+                          {task.updatedAt && task.updatedAt !== task.createdAt && (
+                            <span>Updated: {new Date(task.updatedAt).toLocaleDateString()}</span>
+                          )}
+                        </div>
+
+                        {/* User ID if exists */}
+                        {task.userId && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            User ID: {task.userId}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => {
+                            setViewingTask(task)
+                            setShowDetailModal(true)
+                          }}
+                          className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                          title="View Details"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingTask(task)
+                            setShowTaskModal(true)
+                          }}
+                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                          title="Edit Task"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(task.id)}
+                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                          title="Delete Task"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {showTaskModal && (
+        <TaskModal
+          task={editingTask}
+          categories={categories}
+          onClose={() => {
+            setShowTaskModal(false)
+            setEditingTask(null)
+          }}
+          onSave={() => {
+            loadTasks()
+            setShowTaskModal(false)
+            setEditingTask(null)
+          }}
+        />
+      )}
+
+      {showCategoryModal && (
+        <CategoryModal
+          onClose={() => setShowCategoryModal(false)}
+          onSave={() => {
+            loadCategories()
+            setShowCategoryModal(false)
+          }}
+        />
+      )}
+
+      {showDetailModal && (
+        <TaskDetailModal
+          task={viewingTask}
+          onClose={() => {
+            setShowDetailModal(false)
+            setViewingTask(null)
+          }}
+          onEdit={() => {
+            setShowDetailModal(false)
+            setEditingTask(viewingTask)
+            setShowTaskModal(true)
+          }}
+          onDelete={async () => {
+            if (viewingTask) {
+              await handleDelete(viewingTask.id)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

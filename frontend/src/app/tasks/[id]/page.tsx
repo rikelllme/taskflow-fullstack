@@ -87,17 +87,36 @@ export default function TaskDetail() {
 
   if (error || !task) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {error || 'Task not found'}
-          </h1>
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Back to Dashboard
-          </Link>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page Indicator */}
+          <div className="mb-6">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600">
+              <Link href="/" className="hover:text-gray-900">Dashboard</Link>
+              <span>/</span>
+              <span className="font-medium text-gray-900">Task Details</span>
+            </nav>
+          </div>
+
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <Link
+              href="/"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              ← Back to Dashboard
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900">Task Details</h1>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-8">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {error || 'Task not found'}
+              </h2>
+              <p className="text-gray-600">The task you're looking for doesn't exist or has been deleted.</p>
+            </div>
+          </div>
         </div>
       </div>
     )
