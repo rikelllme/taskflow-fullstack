@@ -144,12 +144,12 @@ taskflow-fullstack/
 *Orinetação sobre o status das tarefas*
 
 ### View Page
-![View Page](images/viewpage.jpg)
+![View Page](images/viewpage.png)
 
 *Pagina para vizualização detalhada da task*
 
 ### Edit Page
-![Edit Page](images/editpage.jpg)
+![Edit Page](images/editpage.png)
 
 *Pagina para edição da task*
 
@@ -224,24 +224,3 @@ npm run lint          # Verificar código
 - **Experiência Fluida**: Transições suaves entre visualização e edição sem perder o estado da aplicação
 - **Manutenibilidade**: Centralização da lógica de formulários e validações em componentes reutilizáveis
 - **SEO Trade-off**: Priorizamos UX interativa sobre SEO para páginas de formulários (aceitável para aplicação interna)
-
-## 🚀 Implantação
-
-### Backend
-1. Faça build da aplicação: `npm run build`
-2. Configure variáveis de ambiente de produção
-3. Execute migrações: `npx prisma migrate deploy`
-4. Inicie o servidor: `npm run start:prod`
-
-### Frontend
-1. Faça build da aplicação: `npm run build`
-2. Implante o diretório `out/` no seu provedor de hospedagem
-
-## 📈 Funcionalidades Avançadas
-
-- **Sistema de Prioridades**: LOW, MEDIUM, HIGH com indicadores visuais
-- **Ícones de Status**: Representação visual clara de estados
-- **Busca em Tempo Real**: Filtragem instantânea de tarefas
-- **Datas Inteligentes**: Destaque para tarefas atrasadas
-- **Estatísticas**: Widget de progresso diário
-- **Glassmorphism**: Design moderno com efeitos de transparência
