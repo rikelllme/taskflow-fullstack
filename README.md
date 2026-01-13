@@ -155,7 +155,7 @@ taskflow-fullstack/
 *Nesta barra lateral, é possível escolher qual categoria deseja filtrar e, ao clicar no X, é possível excluir categorias no + pode adicionar novas categorias.*
 
 ### Category
-![Category](images/create_category)
+![Category](images/create_category.png)
 
 *Tela de Criação de nova categoria*
 
