@@ -98,19 +98,15 @@ taskflow-fullstack/
 1. **Configure a conexão com o banco em `backend/.env`**
    ```env
    # Para PostgreSQL:
-   DATABASE_URL="postgresql://username:password@localhost:5432/taskflow_db"
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=your_username
+   DB_PASS=your_password
+   DB_NAME=your_database
 
-   # Para SQLite (desenvolvimento):
-   DATABASE_URL="file:./dev.db"
    ```
 
-2. **Execute as migrações do banco**
-   ```bash
-   cd backend
-   npx prisma migrate dev --name init
-   ```
-
-3. **Gere o cliente Prisma**
+2. **Gere o cliente Prisma**
    ```bash
    npx prisma generate
    ```
@@ -144,14 +140,14 @@ taskflow-fullstack/
 *Orinetação sobre o status das tarefas*
 
 ### View Page
-![View Page](images/viewpage.jpg)
+![View Page](images/viewpage.png)
 
 *Pagina para vizualização detalhada da task*
 
 ### Edit Page
-![Edit Page](images/editpage.jpg)
+![Edit Page](images/editpage.png)
 
-*Pagina para edição da task*
+*Pagina para edição da task permitindo multiplas seleções de categoria*
 
 ## 📋 Endpoints da API
 
@@ -170,30 +166,16 @@ taskflow-fullstack/
 - `PATCH /categories/:id` - Atualizar categoria
 - `DELETE /categories/:id` - Excluir categoria
 
-## 🎨 Páginas do Frontend
-
-- `/` - **Dashboard**: Lista de tarefas com filtros e indicadores de página
-- `/tasks/new` - **Criar Tarefa**: Formulário completo com navegação breadcrumb
-- `/tasks/[id]` - **Detalhes da Tarefa**: Visualização completa com navegação
-- `/tasks/[id]/edit` - **Editar Tarefa**: Formulário de edição com breadcrumb
-- `/categories` - **Gerenciar Categorias**: Interface completa de CRUD
-
 ## 🔧 Desenvolvimento
 
 ### Scripts do Backend
 ```bash
 npm run start:dev      # Desenvolvimento com hot reload
-npm run build         # Build para produção
-npm run test          # Executar testes
-npm run lint          # Verificar código
 ```
 
 ### Scripts do Frontend
 ```bash
 npm run dev           # Servidor de desenvolvimento
-npm run build         # Build para produção
-npm run start         # Iniciar servidor de produção
-npm run lint          # Verificar código
 ```
 
 ## 🏗️ Decisões Técnicas
@@ -215,33 +197,12 @@ npm run lint          # Verificar código
 ### Arquitetura
 - **RESTful API**: Padrão consolidado para APIs web
 - **State Management**: React hooks para gerenciamento local
-- **Responsive Design**: Interface adaptável para desktop e mobile
+- **Responsive Design**: Interface adaptável para desktop
 - **Error Handling**: Tratamento robusto de erros em toda aplicação
 
 ### Decisões Técnicas - Interface Modal vs Navegação
-- **Modal-Centric Design**: Optamos por usar modais em vez de navegação entre páginas para operações CRUD (criar, editar, visualizar detalhes)
+- **Modal-Centric Design**: Optei por usar modais em vez de navegação entre páginas para operações CRUD (criar, editar, visualizar detalhes)
 - **Performance Otimizada**: Evita recarregamentos de página e mantém o contexto do usuário no dashboard
 - **Experiência Fluida**: Transições suaves entre visualização e edição sem perder o estado da aplicação
 - **Manutenibilidade**: Centralização da lógica de formulários e validações em componentes reutilizáveis
-- **SEO Trade-off**: Priorizamos UX interativa sobre SEO para páginas de formulários (aceitável para aplicação interna)
-
-## 🚀 Implantação
-
-### Backend
-1. Faça build da aplicação: `npm run build`
-2. Configure variáveis de ambiente de produção
-3. Execute migrações: `npx prisma migrate deploy`
-4. Inicie o servidor: `npm run start:prod`
-
-### Frontend
-1. Faça build da aplicação: `npm run build`
-2. Implante o diretório `out/` no seu provedor de hospedagem
-
-## 📈 Funcionalidades Avançadas
-
-- **Sistema de Prioridades**: LOW, MEDIUM, HIGH com indicadores visuais
-- **Ícones de Status**: Representação visual clara de estados
-- **Busca em Tempo Real**: Filtragem instantânea de tarefas
-- **Datas Inteligentes**: Destaque para tarefas atrasadas
-- **Estatísticas**: Widget de progresso diário
-- **Glassmorphism**: Design moderno com efeitos de transparência
+- **SEO Trade-off**: Priorizei UX interativa sobre SEO para páginas de formulários
