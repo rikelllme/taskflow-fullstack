@@ -205,4 +205,8 @@ npm run dev           # Servidor de desenvolvimento
 - **Performance Otimizada**: Evita recarregamentos de página e mantém o contexto do usuário no dashboard
 - **Experiência Fluida**: Transições suaves entre visualização e edição sem perder o estado da aplicação
 - **Manutenibilidade**: Centralização da lógica de formulários e validações em componentes reutilizáveis
+<<<<<<< HEAD
 - **SEO Trade-off**: Priorizei UX interativa sobre SEO para páginas de formulários
+=======
+- **SEO Trade-off**: Priorizamos UX interativa sobre SEO para páginas de formulários (aceitável para aplicação interna)
+>>>>>>> cf97236e9724c2e913a6c62ee29582b42b3ec166
