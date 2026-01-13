@@ -151,7 +151,7 @@ taskflow-fullstack/
 ### Edit Page
 ![Edit Page](images/editpage.png)
 
-*Pagina para edição da task*
+*Pagina para edição da task permitindo multiplas seleções de categoria*
 
 ## 📋 Endpoints da API
 
