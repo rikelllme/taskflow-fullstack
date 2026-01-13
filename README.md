@@ -149,6 +149,17 @@ taskflow-fullstack/
 
 *Pagina para edição da task permitindo multiplas seleções de categoria*
 
+### Category management
+![Category management](images/category.png)
+
+*Nesta barra lateral, é possível escolher qual categoria deseja filtrar e, ao clicar no X, é possível excluir categorias no + pode adicionar novas categorias.*
+
+### Category
+![Category](images/create_category)
+
+*Tela de Criação de nova categoria*
+
+
 ## 📋 Endpoints da API
 
 ### Tarefas
